@@ -11,21 +11,57 @@ import {
     Button,
     Notification,
   } from "@mantine/core";
+  import { Link } from "react-router-dom";
 //   import * as Yup from "yup";
   import { useForm, Controller } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { post } from "../../application/middlewares";
 //   import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { loginSuccess } from "../../application/actions/auth";
+import { SetCookie } from "../../utils/cookie";
 
 function Login(){
+    const schema = Yup.object().shape({
+        username:Yup.string().min(3).max(15).required(),
+        password:Yup.string().min(3).max(15).required()
+    })
+    const navigate = useNavigate()
     const {
         handleSubmit,
         formState: { errors },
         setError,
         control,
-      } = useForm({});
-
+      } = useForm({
+        resolver:yupResolver(schema)
+      });
+      const [loading, setLoading] = useState(false)
+    const dispatch = useDispatch()
+      
+    const onSubmit = (data) =>{
+        console.log(data)
+        dispatch(post({
+            url:`api/user/login`,
+            data,
+            action: (response) =>{
+                console.log(response, "hello")
+                if(response.success){
+                    dispatch(loginSuccess(response.data));
+                    SetCookie("refresh_token", response.data.refresh_token)
+                    navigate("/users")
+                }else{
+                    setError("username",{ type: 'manual', message: "username or password invalid" } )
+                    setError("password", { type: 'manual', message: "username or password invalid" })
+                }
+            }
+        }))
+    }
     return (
         <form
-            // onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit(onSubmit)}
             className="bg-blue-50 w-full h-screen pt-14"
             >
             <Container
@@ -44,12 +80,12 @@ function Login(){
                 ta="center"
                 className="mt-1 mb-10"
                 >
-                    App, honey!
+                    Login
                 </Text>
 
                 <Controller
                 control={control}
-                name="email"
+                name="username"
                 render={({ field: { onChange, onBlur, value, ref } }) => {
                     return (
                     <TextInput
@@ -57,9 +93,9 @@ function Login(){
                         onBlur={onBlur}
                         value={value}
                         ref={ref}
-                        label="Email"
-                        placeholder="you@something.dev"
-                        // error={errors?.email?.message}
+                        label="username"
+                        placeholder="username"
+                        error={errors?.username?.message}
                     />
                     );
                 }}
@@ -77,21 +113,29 @@ function Login(){
                     label="Password"
                     placeholder="Password"
                     mt="md"
-                    // error={errors?.password?.message}
+                    error={errors?.password?.message}
                     />
                 )}
                 />
 
                 <Button
-                type="submit"
-                fullWidth
-                mt="xl"
-                className="mt-8 mb-4 bg-indigo-600"
-                color="indigo.4"
-                //   loading={state.loading}
+                    type="submit"
+                    fullWidth
+                    mt="xl"
+                    className="mt-8 mb-4 bg-indigo-600"
+                    color="indigo.4"
+                    loading={loading}
                 >
                     Login
                 </Button>
+                <Link to="/register">
+                    <Text c="dimmed"
+                        size="sm"
+                        ta="left"
+                        className="mt-1 mb-10">
+                    Register
+                    </Text>
+                </Link>
             </Container>
         </form>
     )

@@ -11,6 +11,7 @@ export const get = ({ url, token, action }) => async () => {
 }
     
 export const post = ({ url, token, action, data }) => async dispatch => {
+    console.log(data, "from here")
     try {
         const response = await api.post({ url, params: data, withCredentials: false, token });
         return action({ success: true, data: response.data });
@@ -32,6 +33,17 @@ export const del = ({ url, token, action }) => async dispatch => {
     try {
         const response = await api.delete({ url, token, withCredentials: false });
         dispatch(action(response.data));
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const upload = ({ url, data, token, action }) => async dispatch => {
+    try {
+        const response = await api.upload({ url, formData:data, token, withCredentials: false });
+        // dispatch(action(response.data));
+        return action({ success: true, data: response.data });
+
     } catch (error) {
         console.log(error)
     }

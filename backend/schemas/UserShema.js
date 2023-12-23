@@ -6,7 +6,13 @@ const UserSchema = {
         birth_date:Joi.date().required(),
         password:Joi.string().min(6).max(25).required(),
         email:Joi.string().email({ tlds: { allow: false } }),
-        image:Joi.string()
+        picture:Joi.any()
+    }),
+    Update:Joi.object({
+        birth_date:Joi.date().required(),
+        password:Joi.string().min(6).max(25).required(),
+        email:Joi.string().email({ tlds: { allow: false } }),
+        picture:Joi.any()
     }),
     Login:Joi.object({
         username:Joi.string().required(),

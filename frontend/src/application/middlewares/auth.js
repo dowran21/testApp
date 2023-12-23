@@ -21,7 +21,7 @@ export const LoadUser = () => async dispatch => {
     let token = GetCookie('refresh_token');
     try {
         if (token) {
-            const response = await api.get({ url: '/api/admin/load-admin', token, withCredentials: true });
+            const response = await api.get({ url: '/api/user/load-user', token, withCredentials: true });
             dispatch(userLoaded(response.data));
         } else {
             dispatch(userLoadFailed());

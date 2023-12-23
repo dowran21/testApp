@@ -18,7 +18,7 @@ import { DateInput, DatePickerInput } from '@mantine/dates';
 import * as Yup from "yup";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {post, upload} from "../../application/middlewares/index"
 import { loginSuccess } from "../../application/actions/auth";
@@ -28,7 +28,6 @@ import { useState } from "react";
 function Register(){
     const navigate = useNavigate()
     const schema = Yup.object().shape({
-        username:Yup.string().required().min(3).max(25),
         email:Yup.string().email().required(),
         password:Yup.string().min(6).max(25).required(),
         birth_date:Yup.date().required()
@@ -44,17 +43,20 @@ function Register(){
     const dispatch = useDispatch()
     const [file, setFile] = useState(null)
     const [loading, setLoading] = useState(false)
+
+    const {user, token} = useSelector(state => state?.auth)
+
     const onSubmit = (data)=>{
         const formData = new FormData();
         formData.append("picture", file)
-        formData.append("username", data.username)
         formData.append("email", data.email)
         formData.append("password", data.password)
         formData.append("birth_date", data.birth_date)
         setLoading(true)
         dispatch(upload({
-            url:'api/user/register',
+            url:'api/user/update-user',
             data:formData,
+            token,
             action: (response) =>{
                 if(response.success){
                     console.log(response.data)
@@ -83,35 +85,17 @@ function Register(){
                     Register
                 </Title>
                 <Text
-                c="dimmed"
-                size="sm"
-                ta="center"
-                className="mt-1 mb-10"
+                    c="dimmed"
+                    size="sm"
+                    ta="center"
+                    className="mt-1 mb-10"
                 >
                     App, honey!
                 </Text>
                 <Controller
                 control={control}
-                name="username"
-                defaultValue=""
-                render={({ field: { onChange, onBlur, value, ref } }) => {
-                    return (
-                    <TextInput
-                        onChange={onChange}
-                        onBlur={onBlur}
-                        value={value}
-                        ref={ref}
-                        label="username"
-                        placeholder="username"
-                        error={errors?.username?.message}
-                    />
-                    );
-                }}
-                />
-                <Controller
-                control={control}
                 name="email"
-                defaultValue=""
+                defaultValue={user.email}
                 render={({ field: { onChange, onBlur, value, ref } }) => {
                     return (
                     <TextInput
@@ -155,7 +139,7 @@ function Register(){
                 <Controller
                 name="birth_date"
                 control={control}
-                defaultValue=""
+                defaultValue={new Date(user.birth_date)}
                 render={({ field: { onChange, onBlur, value, ref } }) => (
                     <DatePickerInput
                     ref={ref}
@@ -178,16 +162,8 @@ function Register(){
                 color="indigo.4"
                   loading={loading}
                 >
-                    Register
+                    Update
                 </Button>
-                <Link to="/login">
-                    <Text c="dimmed"
-                        size="sm"
-                        ta="left"
-                        className="mt-1 mb-10">
-                    Already Registered? Login
-                    </Text>
-                </Link>
             </Container>
         </form>
     )

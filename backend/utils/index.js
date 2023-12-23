@@ -6,7 +6,7 @@ const GenerateAccessToken = async (data) =>{
 }
 
 const GenerateRefreshToken = async (data) =>{
-    return JWT.sign(data, process.env.REFRESH_TOKEN, {expiresIn:"1h"})
+    return JWT.sign(data, process.env.REFRESH_TOKEN, {expiresIn:"1d"})
 }
 
 const HashPassword = async (password) =>{
